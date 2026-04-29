@@ -1,0 +1,38 @@
+# ---------- Go ----------
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Go build output
+/server
+
+# Go workspace
+go.work
+go.work.sum
+
+# ---------- Bun / Node ----------
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# ---------- OS ----------
+.DS_Store
+Thumbs.db
+
+# ---------- IDE ----------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ---------- Env ----------
+.env
+.env.*
+!.env.example
