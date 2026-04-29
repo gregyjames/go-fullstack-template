@@ -45,15 +45,20 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h2>Secure Dashboard</h2>
-        <button onClick={handleLogout} className="btn-logout">Logout</button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-950 flex flex-col items-center justify-center p-10">
+      <div className="flex justify-between items-center w-full max-w-3xl mb-10">
+        <h2 className="text-2xl font-bold text-white">Secure Dashboard</h2>
+        <button 
+          onClick={handleLogout} 
+          className="bg-transparent text-gray-400 border border-white/10 px-4 py-2 rounded-lg cursor-pointer transition-all duration-200 hover:bg-white/10 hover:text-white"
+        >
+          Logout
+        </button>
       </div>
       
-      <div className="stat-card">
-        <h3>Server Connection Status</h3>
-        <div className="value">{message}</div>
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-8 text-center w-full max-w-3xl backdrop-blur-md">
+        <h3 className="text-base text-gray-400 mb-3">Server Connection Status</h3>
+        <div className="text-4xl font-bold text-indigo-500">{message}</div>
       </div>
     </div>
   );
