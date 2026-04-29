@@ -8,14 +8,14 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
       await login(username, password);
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || 'Network error occurred. Please try again.');
     } finally {
       setLoading(false);

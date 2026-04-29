@@ -48,7 +48,7 @@ export default function Navbar() {
                     <a
                       key={item.name}
                       href={item.href}
-                      onClick={(e) => {
+                      onClick={(e: React.MouseEvent) => {
                         e.preventDefault();
                         navigate(item.href);
                       }}
@@ -130,7 +130,7 @@ export default function Navbar() {
                 key={item.name}
                 as="a"
                 href={item.href}
-                onClick={(e) => {
+                onClick={(e: React.MouseEvent) => {
                   e.preventDefault();
                   navigate(item.href);
                 }}

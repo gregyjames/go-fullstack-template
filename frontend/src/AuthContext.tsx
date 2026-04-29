@@ -1,13 +1,21 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const AuthContext = createContext(null);
+interface AuthContextType {
+  token: string | null;
+  isAuthenticated: boolean;
+  login: (username: string, password: string) => Promise<void>;
+  logout: () => void;
+  authFetch: (url: string, options?: RequestInit) => Promise<Response>;
+}
 
-export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem('authToken'));
+const AuthContext = createContext<AuthContextType | null>(null);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('authToken'));
   const navigate = useNavigate();
 
-  const login = useCallback(async (username, password) => {
+  const login = useCallback(async (username: string, password: string) => {
     const encoded = btoa(`${username}:${password}`);
 
     const response = await fetch('/api/ping', {
@@ -29,7 +37,7 @@ export function AuthProvider({ children }) {
     navigate('/login');
   }, [navigate]);
 
-  const authFetch = useCallback(async (url, options = {}) => {
+  const authFetch = useCallback(async (url: string, options: RequestInit = {}) => {
     const currentToken = localStorage.getItem('authToken');
     if (!currentToken) {
       logout();
