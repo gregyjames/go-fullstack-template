@@ -16,8 +16,8 @@ func main() {
 	app.Use(logger.New())
 	app.Use(compress.New())
 
-	// Serve the static files from the frontend dist folder
-	app.Static("/", "./frontend/dist")
+	// Serve the static files from the dist folder
+	app.Static("/", "./dist")
 
 	// API route group with basic auth
 	api := app.Group("/api", basicauth.New(basicauth.Config{
@@ -33,7 +33,7 @@ func main() {
 
 	// Fallback to index.html for SPA routing
 	app.Get("*", func(c *fiber.Ctx) error {
-		return c.SendFile("./frontend/dist/index.html")
+		return c.SendFile("./dist/index.html")
 	})
 
 	log.Fatal(app.Listen(":3000"))

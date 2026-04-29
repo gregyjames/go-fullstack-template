@@ -2,14 +2,11 @@
 FROM oven/bun:1-alpine AS frontend-builder
 WORKDIR /app
 
-# Copy package files
+# Copy package files and install dependencies
 COPY frontend/package.json frontend/bun.lock ./
+RUN bun install --frozen-lockfile
 
-# Use cache mounts to dramatically speed up subsequent bun installs
-RUN --mount=type=cache,target=/root/.bun/install/cache \
-    bun install --frozen-lockfile
-
-# Copy the rest of the frontend source and build
+# Copy frontend source and build
 COPY frontend/ ./
 RUN bun run build
 
@@ -17,42 +14,28 @@ RUN bun run build
 FROM golang:alpine AS backend-builder
 WORKDIR /app
 
-# Add required alpine packages for production (timezone and SSL certs)
-RUN apk add --no-cache tzdata ca-certificates
-
-# Copy go.mod and go.sum and download dependencies using cache
+# Copy go.mod/sum and download dependencies
 COPY go.mod go.sum ./
-RUN --mount=type=cache,target=/go/pkg/mod \
-    go mod download
+RUN go mod download
 
-# Copy the application source code
+# Copy backend source and build
 COPY main.go ./
-
-# Build the application with optimizations:
-# -ldflags="-w -s" removes debugging info and symbol tables, making the binary much smaller
-RUN --mount=type=cache,target=/root/.cache/go-build \
-    --mount=type=cache,target=/go/pkg/mod \
-    CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o server main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o server main.go
 
 # Stage 3: Final lightweight production image
 FROM alpine:latest
 WORKDIR /app
 
-# Security: Create a non-root user and group
+# Create a non-root user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-# Copy timezone data and SSL certificates from builder
-COPY --from=backend-builder /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=backend-builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-
 # Copy the compiled Go binary and frontend static files
-# Use --chown directly to prevent Docker from creating redundant file layers
-COPY --from=backend-builder --chown=appuser:appgroup /app/server .
-COPY --from=frontend-builder --chown=appuser:appgroup /app/dist ./frontend/dist
+COPY --from=backend-builder /app/server .
+COPY --from=frontend-builder /app/dist ./dist
 
-# Security: Switch from root to the new restricted user
+# Set permissions
+RUN chown -R appuser:appgroup /app
+
 USER appuser
-
 EXPOSE 3000
-
 CMD ["./server"]
