@@ -1,79 +1,91 @@
 import React, { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { useAuth } from './AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const { mutate, isPending } = useMutation({
+    mutationFn: async () => {
+      await login(username, password);
+    },
+    onError: (err: any) => {
+      setError(err.message || 'Network error occurred. Please try again.');
+    },
+  });
+
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
-
-    try {
-      await login(username, password);
-    } catch (err: any) {
-      setError(err.message || 'Network error occurred. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    mutate();
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-950 flex items-center justify-center p-5">
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-12 w-full max-w-md shadow-2xl">
-        <h1 className="text-3xl font-bold mb-2 text-center text-white">Welcome Back</h1>
-        <p className="text-gray-400 text-center mb-8 text-sm">Sign in to access your dashboard</p>
-        
-        {error && (
-          <div className="bg-red-500/10 text-red-400 p-3 rounded-lg text-sm text-center mb-5 border border-red-500/20">
-            {error}
-          </div>
-        )}
+      <Card className="bg-white/5 backdrop-blur-xl border-white/10 w-full max-w-md shadow-2xl text-white">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-3xl font-bold text-center">Welcome Back</CardTitle>
+          <CardDescription className="text-gray-400 text-center">
+            Sign in to access your dashboard
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {error && (
+            <div className="bg-red-500/10 text-red-400 p-3 rounded-lg text-sm text-center mb-5 border border-red-500/20">
+              {error}
+            </div>
+          )}
 
-        <form onSubmit={handleLogin}>
-          <div className="mb-5 flex flex-col">
-            <label htmlFor="username" className="text-sm font-medium mb-2 text-white">
-              Username
-            </label>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
-              className="bg-black/20 border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-              required
-            />
-          </div>
-          
-          <div className="mb-5 flex flex-col">
-            <label htmlFor="password" className="text-sm font-medium mb-2 text-white">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="bg-black/20 border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-              required
-            />
-          </div>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="username" className="text-white">
+                Username
+              </Label>
+              <Input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
+                className="bg-black/20 border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-indigo-500/20 focus-visible:border-indigo-500"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-white">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="bg-black/20 border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-indigo-500/20 focus-visible:border-indigo-500"
+                required
+              />
+            </div>
 
-          <button 
-            type="submit" 
-            className="w-full bg-indigo-600 text-white rounded-xl py-3.5 text-base font-semibold cursor-pointer transition-all duration-200 mt-3 hover:bg-indigo-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/30 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={loading}
-          >
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
-      </div>
+            <Button 
+              type="submit" 
+              variant="default"
+              size="lg"
+              className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white"
+              disabled={isPending}
+            >
+              {isPending ? 'Signing in...' : 'Sign In'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
