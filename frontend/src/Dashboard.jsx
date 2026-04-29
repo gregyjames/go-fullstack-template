@@ -1,44 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from './AuthContext';
 import Navbar from './Navbar';
 
 export default function Dashboard() {
   const [message, setMessage] = useState('Loading...');
-  const navigate = useNavigate();
+  const { authFetch } = useAuth();
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-
     const fetchPing = async () => {
       try {
-        const response = await fetch('/api/ping', {
-          headers: {
-            'Authorization': `Basic ${token}`
-          }
-        });
-
+        const response = await authFetch('/api/ping');
         if (response.ok) {
           const data = await response.json();
           setMessage(`API says: ${data.message}`);
         } else {
-          setMessage('Failed to load data. Unauthorized.');
-          // Auto-logout on 401
-          if (response.status === 401) {
-            localStorage.removeItem('authToken');
-            navigate('/login');
-          }
+          setMessage('Failed to load data.');
         }
       } catch (err) {
-        setMessage('Network error.');
+        if (err.message !== 'Unauthorized' && err.message !== 'No auth token') {
+          setMessage('Network error.');
+        }
       }
     };
 
     fetchPing();
-  }, [navigate]);
+  }, [authFetch]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-950">

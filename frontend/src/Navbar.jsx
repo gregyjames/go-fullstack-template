@@ -1,6 +1,7 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useAuth } from './AuthContext'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
@@ -13,11 +14,7 @@ function classNames(...classes) {
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    navigate('/login');
-  };
+  const { logout } = useAuth();
 
   return (
     <Disclosure
@@ -112,7 +109,7 @@ export default function Navbar() {
                 </MenuItem>
                 <MenuItem>
                   <button
-                    onClick={handleLogout}
+                    onClick={logout}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-300 data-focus:bg-white/5 data-focus:outline-hidden"
                   >
                     Sign out

@@ -1,36 +1,22 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from './AuthContext';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    const token = btoa(`${username}:${password}`);
-    
     try {
-      // Test the credentials against the API
-      const response = await fetch('/api/ping', {
-        headers: {
-          'Authorization': `Basic ${token}`
-        }
-      });
-
-      if (response.ok) {
-        localStorage.setItem('authToken', token);
-        navigate('/dashboard');
-      } else {
-        setError('Invalid username or password');
-      }
+      await login(username, password);
     } catch (err) {
-      setError('Network error occurred. Please try again.');
+      setError(err.message || 'Network error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
