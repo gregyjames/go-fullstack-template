@@ -26,15 +26,19 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o server main.go
 FROM alpine:latest
 WORKDIR /app
 
-# Create a non-root user for security
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+# Create a non-root user and the data directory for the SQLite database
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup && \
+    mkdir -p /data && chown -R appuser:appgroup /data
 
 # Copy the compiled Go binary and frontend static files
 COPY --from=backend-builder /app/server .
 COPY --from=frontend-builder /app/dist ./dist
 
-# Set permissions
+# Set permissions for the app directory
 RUN chown -R appuser:appgroup /app
+
+# Expose the data directory as a volume for persistence
+VOLUME ["/data"]
 
 USER appuser
 EXPOSE 3000
